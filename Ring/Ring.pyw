@@ -26,7 +26,7 @@ class alarmClock():
     soundBox.insert(0, '')
     
         
-    def makeFrame(self, windowToPlaceIn, position):
+    def makeFrame(self, windowToPlaceIn, row_position, col_position):
         next(_ids)
 
 
@@ -56,7 +56,7 @@ class alarmClock():
                            highlightthickness=1,\
                            highlightbackground="black")
 
-        planLabel = Label(alarmFrame, text="Схема "+str(_ids)[6], font=13)
+        planLabel = Label(alarmFrame, text=""+str(_ids)[6], font=13)
         planLabel.grid(column=0, columnspan=4, row=0)
 
         onOff = StringVar()
@@ -66,7 +66,7 @@ class alarmClock():
                                 variable=onOff,\
                                 value="lawngreen",\
                                 indicatoron=False)
-        onRbutton.grid(column=4, row=0, sticky="E")
+        onRbutton.grid(column=4, row=0, sticky="E", padx=42)
         onRbutton.bind("<Button-1>", doOn)
         
         offRbutton = Radiobutton(alarmFrame,\
@@ -74,7 +74,7 @@ class alarmClock():
                                  variable=onOff,\
                                  value="red",\
                                  indicatoron=False)
-        offRbutton.grid(column=4, row=0, sticky="E", padx=32)
+        offRbutton.grid(column=4, row=0, sticky="E")
         offRbutton.bind("<Button-1>", doOff)
         
         indicator = Label(alarmFrame, background="red", width=2)
@@ -85,7 +85,7 @@ class alarmClock():
         self.addAlarm(alarmFrame)
         self.addAlarm(alarmFrame)
 
-        alarmFrame.grid(column=position, row=0, padx=2, pady=4)
+        alarmFrame.grid(column=col_position, row=row_position, padx=2, pady=4)
 
 
     def addAlarm(self,frame):
@@ -111,7 +111,7 @@ class alarmClock():
         testSound.grid(column=3, row=len(self.alarms)+1, padx=5, pady=5)
         testSound.bind("<Button-1>", self.playSound)
 
-        sound = ttk.Combobox(frame, values=self.soundBox, state="readonly")
+        sound = ttk.Combobox(frame, values=self.soundBox, state="readonly", width=10)
         sound.grid(column=4, row=len(self.alarms)+1)
 
         self.alarms[len(self.alarms)+1] = [hourInput, minuteInput, testSound, sound]
@@ -240,7 +240,6 @@ def addClockWindow():
         _clockWindow.overrideredirect(True)
         _clockWindow.bind("<Double-Button-1>", closeClock)
         _clockWindow.bind("<ButtonPress-1>", startMove)
-        #_clockWindow.bind("<ButtonRelease-1>", stopMove) -> is this realy need???
         _clockWindow.bind("<B1-Motion>", onMotion)
         screenWidth = (_clockWindow.winfo_screenwidth()/2) -80
         screenHeight = _clockWindow.winfo_screenheight() -30
@@ -282,6 +281,7 @@ def addMessage(event):
 
     if not _editMessage:
         _editMessage = Toplevel(root)
+        _editMessage.resizable(width=FALSE, height=FALSE)
         _editMessage.bind("<Alt-F4>", sendText)
         _editMessage.protocol("WM_DELETE_WINDOW", closeCross)
         askEnter = Label(_editMessage, text="Введите текст")
@@ -337,14 +337,14 @@ def close():
 
 
 root = Tk()
-rootWidth = 663
-rootHeight = 185
+rootWidth = 385
+rootHeight = 515
 root.geometry(str(rootWidth)+'x'+str(rootHeight)+'+'+\
               str((root.winfo_screenwidth()/2)-rootWidth/2)[:-2]+"+"+\
               str((root.winfo_screenheight()/2)-rootHeight/2)[:-2])
 root.resizable(width=FALSE, height=FALSE)
 root.iconbitmap(r'images\\icon.ico')
-root.title('Ring')
+root.title('Time')
 
 _editMessage = None
 _clockWindow = None
@@ -359,42 +359,50 @@ _message.set("Перерыв")
 _clockOnOff = IntVar()
 
 alarmObject = alarmClock()
-alarmObject.makeFrame(root,0)
-alarmObject.makeFrame(root,1)
-alarmObject.makeFrame(root,2)
+alarmObject.makeFrame(root,0,0)
+alarmObject.makeFrame(root,0,1)
+alarmObject.makeFrame(root,1,0)
+alarmObject.makeFrame(root,1,1)
+alarmObject.makeFrame(root,2,0)
+alarmObject.makeFrame(root,2,1)
 
-messageButton = Button(root, text="Текст")
-messageButton.grid(column=0, row=1, sticky="E", padx=76)
-messageButton.bind("<Button-1>", addMessage)
+#_________________________________________
+message_frame = Frame(root)
+message_frame.grid(column=0, row=3)
 
-offMRbutton = Radiobutton(root, text="Выкл", variable=_onOffMessage, value='red', indicatoron=False)
+offMRbutton = Radiobutton(message_frame, text="Выкл", variable=_onOffMessage, value='red', indicatoron=False)
 offMRbutton.bind("<Button-1>", infoOff)
-offMRbutton.grid(column=0, row=1, sticky="E", padx=30)
+offMRbutton.pack(side=RIGHT)
 
-onMRbutton = Radiobutton(root, text="Вкл", variable=_onOffMessage, value='lawngreen', indicatoron=False)
+onMRbutton = Radiobutton(message_frame, text="Вкл", variable=_onOffMessage, value='lawngreen', indicatoron=False)
 onMRbutton.bind("<Button-1>", infoOn)
-onMRbutton.grid(column=0, row=1, sticky="E")
+onMRbutton.pack(side=RIGHT)
 
-messageIndicator = Label(root, background = "red", width=2)
-messageIndicator.grid(column=0, row=1, sticky="W", padx=75)
+messageIndicator = Label(message_frame, background = "red", width=2)
+messageIndicator.pack(side=RIGHT, padx=10, pady=10)
 
-clock = Label(root, text="time")
-clock.after_idle(updateTime)
-clock.grid(column=1, row=1)
+messageButton = Button(message_frame, text="Текст")
+messageButton.bind("<Button-1>", addMessage)
+messageButton.pack(side=RIGHT)
 
-clockButton = Label(root, text="Часы")
-clockButton.grid(column=2, row=1, sticky="E", padx=76)
+clock_frame = Frame(root)
+clock_frame.grid(column=1, row=3)
 
-offClockButton = Radiobutton(root, text="Выкл", variable=_clockOnOff, value=1, indicatoron=False)
+offClockButton = Radiobutton(clock_frame, text="Выкл", variable=_clockOnOff, value=1, indicatoron=False)
 offClockButton.bind("<Button-1>", clockOff)
-offClockButton.grid(column=2, row=1, sticky="E", padx=30)
+offClockButton.pack(side=RIGHT)
 
-onClockButton = Radiobutton(root, text="Вкл", variable=_clockOnOff, value=2, indicatoron=False)
+onClockButton = Radiobutton(clock_frame, text="Вкл", variable=_clockOnOff, value=2, indicatoron=False)
 onClockButton.bind("<Button-1>", clockOn)
-onClockButton.grid(column=2, row=1, sticky="E")
+onClockButton.pack(side=RIGHT)
 
-#DEBUGBUTTON = Button(root, text="DEBUG", command=alarmInfo)
+clock = Label(clock_frame, text="time")
+clock.after_idle(updateTime)
+clock.pack(side=RIGHT)
+
+#DEBUGBUTTON = Button(clock_frame, text="DEBUG", command=alarmInfo)
 #DEBUGBUTTON.grid(column=0, row=2)
+#_____________________________________________
 
 readCfg()
 
