@@ -61,7 +61,7 @@ class alarmClock():
                                 variable=onOff,
                                 value="lawngreen",
                                 indicatoron=False)
-        onRbutton.grid(column=4, row=0, sticky="E", padx=42)
+        onRbutton.grid(column=4, row=0, sticky="E", padx=39)
         onRbutton.bind("<Button-1>", doOn)
         
         offRbutton = Radiobutton(alarmFrame,
@@ -80,7 +80,7 @@ class alarmClock():
         self.addAlarm(alarmFrame)
         self.addAlarm(alarmFrame)
 
-        alarmFrame.grid(column=col_position, row=row_position, padx=2, pady=4)
+        alarmFrame.grid(column=col_position, row=row_position, padx=2, pady=2)
 
     def addAlarm(self,frame):
         hourInput = Entry(frame, width=2)
@@ -330,8 +330,8 @@ def close():
 
 
 root = Tk()
-rootWidth = 385
-rootHeight = 515
+rootWidth = 372
+rootHeight = 507
 root.geometry(str(rootWidth)+'x'+str(rootHeight)+'+'+\
               str((root.winfo_screenwidth()/2)-rootWidth/2)[:-2]+"+"+\
               str((root.winfo_screenheight()/2)-rootHeight/2)[:-2])
@@ -361,7 +361,7 @@ alarmObject.makeFrame(root,2,1)
 
 #_________________________________________
 message_frame = Frame(root)
-message_frame.grid(column=0, row=3)
+message_frame.grid(column=0, row=3, ipadx=5)
 
 offMRbutton = Radiobutton(message_frame, text="Выкл", variable=_onOffMessage, value='red', indicatoron=False)
 offMRbutton.bind("<Button-1>", infoOff)
@@ -369,17 +369,17 @@ offMRbutton.pack(side=RIGHT)
 
 onMRbutton = Radiobutton(message_frame, text="Вкл", variable=_onOffMessage, value='lawngreen', indicatoron=False)
 onMRbutton.bind("<Button-1>", infoOn)
-onMRbutton.pack(side=RIGHT)
+onMRbutton.pack(side=RIGHT, padx=(10,0))
 
 messageIndicator = Label(message_frame, background="red", width=2)
-messageIndicator.pack(side=RIGHT, padx=10, pady=10)
+messageIndicator.pack(side=RIGHT, padx=(20,10), pady=10)
 
 messageButton = Button(message_frame, text="Текст")
 messageButton.bind("<Button-1>", addMessage)
 messageButton.pack(side=RIGHT)
 
 clock_frame = Frame(root)
-clock_frame.grid(column=1, row=3)
+clock_frame.grid(column=1, row=3, ipadx=7)
 
 offClockButton = Radiobutton(clock_frame, text="Выкл", variable=_clockOnOff, value=1, indicatoron=False)
 offClockButton.bind("<Button-1>", clockOff)
@@ -387,7 +387,7 @@ offClockButton.pack(side=RIGHT)
 
 onClockButton = Radiobutton(clock_frame, text="Вкл", variable=_clockOnOff, value=2, indicatoron=False)
 onClockButton.bind("<Button-1>", clockOn)
-onClockButton.pack(side=RIGHT)
+onClockButton.pack(side=RIGHT, padx=(10,0))
 
 clockIndicator = Label(clock_frame, background="red", width=2)
 clockIndicator.pack(side=RIGHT, padx=10, pady=10)
