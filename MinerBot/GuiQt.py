@@ -1,21 +1,21 @@
-from PyQt4 import QtGui, QtCore
 import sys
 from MainSearch import *
+from PyQt4 import QtGui, QtCore
 
 
 class SearchThread(QtCore.QThread):
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
+
     def run(self):
         all_codes = scan_all()
         result = enter_all(all_codes)
         
-        self.emit(QtCore.SIGNAL('codes'),'New entries: {_result}'.format(_result=result))
+        self.emit(QtCore.SIGNAL('codes'), 'New entries: {_result}'.format(_result=result))
 
 
 class CustomOut(QtCore.QObject):
     text_wr = QtCore.pyqtSignal(str)
-
 
     def write(self, text):
         self.text_wr.emit(str(text))
@@ -83,12 +83,11 @@ class MainWindow(QtGui.QWidget):
 
         self.tray_menu = QtGui.QMenu(self)
         self.tray_show_action = self.tray_menu.addAction('Show', self.showNormal)
-        self.tray_close_action = self.tray_menu.addAction('Close',QtGui.qApp.quit)
+        self.tray_close_action = self.tray_menu.addAction('Close', QtGui.qApp.quit)
         self.sys_tray.setContextMenu(self.tray_menu)
 
         self.about = QtGui.QLabel('<center>---By SkyRocker---</center>')
         self.vbox.addWidget(self.about)
-
 
     def sys_tray_activated(self, reason):
         if reason == self.sys_tray.DoubleClick:
@@ -96,7 +95,6 @@ class MainWindow(QtGui.QWidget):
             self.raise_()
             self.activateWindow()
             self.showNormal()
-
         
     def text_browser_out(self, text):
         state_code_name = text.split(None, 2)
@@ -108,13 +106,13 @@ class MainWindow(QtGui.QWidget):
             cursor_format.setFontUnderline(True)
             cursor_format.setAnchorHref("http://gameminer.net/giveaway/"+state_code_name[1])
             cursor.setCharFormat(cursor_format)
-            cursor.insertText(state_code_name[0] +' '+ state_code_name[2])
+            cursor.insertText(state_code_name[0] + ' ' + state_code_name[2])
         elif 'Entered: ' in text:
             cursor_format.setForeground(QtCore.Qt.blue)
             cursor_format.setFontUnderline(True)
             cursor_format.setAnchorHref("http://gameminer.net/giveaway/"+state_code_name[1])
             cursor.setCharFormat(cursor_format)
-            cursor.insertText(state_code_name[0] +' '+ state_code_name[2])
+            cursor.insertText(state_code_name[0] + ' ' + state_code_name[2])
         else:
             cursor_format.setForeground(QtCore.Qt.black)
             cursor_format.UnderlineStyle(0)
@@ -127,14 +125,11 @@ class MainWindow(QtGui.QWidget):
         self.text_browser.clear()
         self.thread.start()
 
-
     def on_change(self, text):
         self.result.setText(text)
 
-
     def auto_enter(self):
         self.start_search()
-
 
     def minimize(self):
         self.hide()

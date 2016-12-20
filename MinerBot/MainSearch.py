@@ -1,33 +1,21 @@
-# -*- coding: utf-8 -*-
 import requests
 import time
+from configparser import ConfigParser
 
-try:
-    import configparser
-except:
-    import ConfigParser
-    
 
 def read_cfg():
-    try:
-        config = ConfigParser.ConfigParser()
-    except(NameError):
-        config = configparser.ConfigParser()
+    config = ConfigParser()
     config.read_file(open('config.cfg'))
     return dict(config.items('YourData'))
 
 
 def write_cfg(data):
-    try:
-        config = ConfigParser.ConfigParser()
-    except(NameError):
-        config = configparser.ConfigParser()
+    config = ConfigParser()
     config['YourData'] = data
-    config.write(open('config.cfg','w'))
+    config.write(open('config.cfg', 'w'))
 
 
 def scan_free_games(pageType):
-    #preparation for registered search
     set_headers = {
         "Host": "gameminer.net",
         "Connection": "keep-alive",
@@ -52,17 +40,17 @@ def scan_free_games(pageType):
     last_page = site.get('last_page')
 
     for x in range(1, last_page+1):
-        time.sleep(0.1) # Without this pause we get - JSONDecodeError 0_o 
+        time.sleep(0.1)  # Without this pause we get - JSONDecodeError 0_o
         page = session.get('http://gameminer.net/api/giveaways/{0}?page={1}&count=20'.format(pageType, x)).json()
-        games_on_page = len(page["giveaways"]) #in each 'giveaways' dict we have full info about games
+        games_on_page = len(page["giveaways"])
         counter = 1
-        for i in range(0, games_on_page):
+        for i in range(games_on_page):
             take_game = page["giveaways"][i]
             name = take_game.get('game').get('name')
             price = take_game.get('price')
             entered = take_game.get('entered')
             code = take_game.get('code')
-            if code not in exclude_codes and entered == None and price == 0:
+            if code not in exclude_codes and not entered and price == 0:
                 free_games_dict["game "+str(counter)+" on page "+str(x)] = [code, name]
                 counter += 1
             if code in exclude_codes:
@@ -135,9 +123,9 @@ def enter_all(all_game_codes):
             return 'Re-login on gameminer.net (bad cfg file)'
         elif 'error' in str(enter.text):
             exclude.append(game[0])
-            print("Conditions\DLC: {_code} {_name}".format(_code=game[0], _name=game[1]))
+            print("Conditions\DLC: {code} {name}".format(code=game[0], name=game[1]))
         elif '"status": "ok"' in str(enter.text):
-            print('Entered: {_code} {_name}'.format(_code=game[0], _name=game[1]))
+            print('Entered: {code} {name}'.format(code=game[0], name=game[1]))
             entered += 1
     print("New entries: {0}".format(entered))
     my_data['excludecodes'] = exclude
@@ -160,4 +148,3 @@ if __name__=='__main__':
     #enter_all(scan_coal())
     pass
     #DEBUG#print(str(enter_giveaway("http://gameminer.net/giveaway/enter/91c22a60671d8958d1a58114e8546025").text))
-    
