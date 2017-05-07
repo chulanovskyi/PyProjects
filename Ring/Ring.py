@@ -9,21 +9,41 @@ import configparser
 import pyaudio
 
 
+if os.name == 'posix':
+    ROOT_WIDTH = 397
+    ROOT_HEIGHT = 507
+else:
+    ROOT_WIDTH = 372
+    ROOT_HEIGHT = 507
+
+BASE_DIR = os.path.abspath(os.path.curdir)
+SOUNDS_DIR = os.path.join(BASE_DIR, "soundBox/")
+SOUNDS_LIST = [''] + os.listdir("soundBox")
+
+
 class AlarmClock:
     """AlarmClock docs"""
-    alarms = {}
-    alarm_time = {}
-    soundBox = os.listdir("soundBox")
-    soundBox.insert(0, '')
+    frame_counter = 1
+    # alarms = {}
+    # alarm_time = {}
+
+    def __init__(self):
+        self.alarms = {}
+        self.alarm_time = {}
+
+    @classmethod
+    def get_frame_counter(cls):
+        return AlarmClock.frame_counter
 
     def make_frame(self, window_to_place_in, row_position, col_position):
         """make_frame docs"""
+        AlarmClock.frame_counter += 1
         next(frame_id)
 
         def do_on(event):
             """do_on docs"""
             caller = event.widget.winfo_parent()
-            if indicator["background"] != "lawngreen":
+            if indicator["background"] == "red":
                 for key, val in self.alarms.items():
                     for item in self.alarms[key]:
                         if caller in item.winfo_parent() and item.winfo_class() == "Entry":
@@ -35,7 +55,7 @@ class AlarmClock:
             """do_off docs"""
             caller = event.widget.winfo_parent()
             temp_dict = self.alarm_time.copy()
-            if indicator["background"] != "red":
+            if indicator["background"] == "lawngreen":
                 for key, val in temp_dict.items():
                     if caller in key.winfo_parent():
                         del self.alarm_time[key]
@@ -95,12 +115,12 @@ class AlarmClock:
         minute_input.grid(column=2, row=len(self.alarms)+1, pady=2)
 
         sound_icon = PhotoImage(file="images/speaker.gif")
-        test_sound = Button(frame, image=sound_icon)
+        test_sound = Button(frame, image=sound_icon, name=str(frame_id)+str(len(self.alarms)))
         test_sound.image = sound_icon
         test_sound.grid(column=3, row=len(self.alarms)+1, padx=5, pady=5)
         test_sound.bind("<Button-1>", self.play_sound)
 
-        sound = ttk.Combobox(frame, values=self.soundBox, state="readonly", width=10)
+        sound = ttk.Combobox(frame, values=SOUNDS_LIST, state="readonly", width=10)
         sound.grid(column=4, row=len(self.alarms)+1)
 
         self.alarms[len(self.alarms)+1] = [hour_input, minute_input, test_sound, sound]
@@ -144,10 +164,10 @@ class AlarmClock:
     def play_sound(self, event):
         """play_sound docs"""
         caller = event.widget
-        for key, val in self.alarms.items():
-            if caller in val:
-                combobox_value = self.alarms[key][3].get()
-                sound_path = os.path.join(BASE_PATH, "soundBox/%s" % combobox_value)
+        for row_num, row_widgets in self.alarms.items():
+            if caller in row_widgets:
+                combobox = row_widgets[3]
+                sound_path = os.path.join(SOUNDS_DIR, combobox.get())
                 sound = wave.open(sound_path, 'rb')
 
                 def player_callback(in_data, frame_count, time_info, status):
@@ -212,9 +232,11 @@ def update_time():
         _clock_window.wm_attributes('-topmost', 1)
     if alarm_object.alarm_time:
         for k, v in alarm_object.alarm_time.items():
+            print(alarm_object)
             if v == clock['text']:
-                sound_path = os.path.join(BASE_PATH,
-                                          "soundBox/%s" % k.get())
+                sound_path = os.path.join(SOUNDS_DIR, k.get())
+                play_sound(sound_path)
+                '''
                 sound = wave.open(sound_path, 'rb')
 
                 def player_callback(in_data, frame_count, time_info, status):
@@ -230,9 +252,27 @@ def update_time():
                         stream_callback=player_callback,
                 )
                 stream.start_stream()
-
+                '''
                 if message_indicator['background'] == 'lawngreen':
                     alarm_info()
+
+
+def play_sound(sound_path):
+    sound = wave.open(sound_path, 'rb')
+
+    def player_callback(in_data, frame_count, time_info, status):
+        data = sound.readframes(frame_count)
+        return data, pyaudio.paContinue
+
+    stream = player.open(
+        format=player.get_format_from_width(
+            sound.getsampwidth()),
+        channels=sound.getnchannels(),
+        rate=sound.getframerate(),
+        output=True,
+        stream_callback=player_callback,
+    )
+    stream.start_stream()
 
 
 def add_clock_window():
@@ -386,17 +426,13 @@ def close():
     root.destroy()
 
 if __name__ == '__main__':
-    ROOT_WIDTH = 372
-    ROOT_HEIGHT = 507
-    BASE_PATH = os.path.abspath(os.path.curdir)
-
     root = Tk()
     root.geometry(str(ROOT_WIDTH)+'x'+str(ROOT_HEIGHT)+'+' +
                   str((root.winfo_screenwidth()/2)-ROOT_WIDTH/2)[:-2]+"+" +
                   str((root.winfo_screenheight()/2)-ROOT_HEIGHT/2)[:-2])
     root.resizable(width=FALSE, height=FALSE)
     root.title('Time')
-    icon = Image('photo', file=(os.path.join(BASE_PATH, 'images/icon.gif')))
+    icon = Image('photo', file=(os.path.join(BASE_DIR, 'images/icon.gif')))
     root.tk.call('wm', 'iconphoto', root._w, icon)
 
     player = pyaudio.PyAudio()
