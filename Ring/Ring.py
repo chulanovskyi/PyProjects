@@ -429,6 +429,9 @@ if __name__ == '__main__':
     screen_size_x = str(int((root.winfo_screenwidth() / 2) - ROOT_WIDTH / 2))
     screen_size_y = str(int((root.winfo_screenheight() / 2) - ROOT_HEIGHT / 2))
     screen_size = str(ROOT_WIDTH)+'x'+str(ROOT_HEIGHT)
+    get_dpi = root.winfo_fpixels('1i')
+    if get_dpi > 100:
+        root.tk.call('tk', 'scaling', '-displayof', '.', get_dpi/90)
     root.title('Time')
     root.geometry(screen_size + '+' + screen_size_x + "+" + screen_size_y)
     root.resizable(width=FALSE, height=FALSE)
